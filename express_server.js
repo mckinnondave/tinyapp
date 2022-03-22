@@ -14,7 +14,7 @@ const urlDatabase = {
 
 function generateRandomString() {
   let result = ""
-  let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+  let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
   for (let i = 0; i < chars.length; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));   
   }
@@ -22,8 +22,15 @@ function generateRandomString() {
 }
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);
-  res.send("Ok");
+  let randomKey = generateRandomString();
+  console.log(`TinyURL created for ${req.body.longURL}`);
+  urlDatabase[randomKey] = req.body.longURL
+  res.redirect(`/urls/${randomKey}`);
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL]
+  res.redirect(longURL);
 });
 
 app.get("/", (req, res) => {
@@ -45,7 +52,7 @@ app.get("/urls/:shortURL", (req, res) => {
 })
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`App is listening on port ${PORT}!`);
 })
 
 app.get("/urls.json", (req, res) => {
