@@ -23,10 +23,21 @@ function generateRandomString() {
 
 app.post("/urls", (req, res) => {
   let randomKey = generateRandomString();
-  console.log(`TinyURL created for ${req.body.longURL}`);
   urlDatabase[randomKey] = req.body.longURL
   res.redirect(`/urls/${randomKey}`);
+  console.log(`TinyURL created for ${req.body.longURL}`);
 });
+
+app.post("/urls/:id/edit", (req, res) => {
+  const shortURL = req.params.id;
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect(`/urls/${shortURL}`)
+})
+
+app.post("/urls/:id", (req, res) => {
+  const shortURL = req.params.id
+  res.redirect(`/urls/${shortURL}`)
+})
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL]
