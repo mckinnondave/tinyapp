@@ -17,16 +17,15 @@ const urlDatabase = {
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
-    email: "user@example.com", 
+    email: "1@example.com", 
     password: "123"
   },
  "user2RandomID": {
     id: "user2RandomID", 
-    email: "user2@example.com", 
+    email: "2@example.com", 
     password: "456"
   }
 }
-
 
 function generateRandomString() {
   let result = ""
@@ -35,6 +34,15 @@ function generateRandomString() {
     result += chars.charAt(Math.floor(Math.random() * chars.length));   
   }
   return result.substring(0,6)
+}
+
+const checkForRegisteredUsers = (database, email) => {
+  for (const data in database) {
+    if (database[data]["email"] === email) {
+      return true;
+    }
+  }
+  return false
 }
 
 app.post("/urls", (req, res) => {
@@ -67,7 +75,7 @@ app.post("/login", (req, res) => {
 })
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username", { path: "/" });
+  res.clearCookie("user_id", { path: "/" });
   res.redirect("/urls")
 })
 
@@ -78,7 +86,18 @@ app.post("/register", (req, res) => {
   newUser.id = randomString;
   newUser.email = req.body.email;
   newUser.password = req.body.password;
-  users[newUser.id] = newUser 
+  
+  if (newUser.email === "" || newUser.password === "") {
+    res.status(400);
+    return res.send("400: Email or password fields were not filled in.")
+  }
+
+  if (checkForRegisteredUsers(users, newUser.email)) {
+    res.status(400);
+    return res.send("400: Email is already being used.")
+  }
+  
+  users[newUser.id] = newUser
   res.cookie("user_id", users[newUser.id])
   res.redirect("/urls")
 })
