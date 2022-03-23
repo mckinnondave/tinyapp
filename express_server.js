@@ -36,10 +36,19 @@ function generateRandomString() {
   return result.substring(0,6)
 }
 
-const checkForRegisteredUsers = (database, email) => {
+const checkForRegisteredEmail = (database, email) => {
   for (const data in database) {
     if (database[data]["email"] === email) {
-      return true;
+      return database[data];
+    }
+  }
+  return false
+}
+
+const checkForRegisteredPassword = (database, password) => {
+  for (const data in database) {
+    if (database[data]["password"] === password) {
+      return database[data];
     }
   }
   return false
@@ -49,7 +58,6 @@ app.post("/urls", (req, res) => {
   let randomKey = generateRandomString();
   urlDatabase[randomKey] = req.body.longURL
   res.redirect(`/urls/${randomKey}`);
-  console.log(`TinyURL created for ${req.body.longURL}`);
 });
 
 app.post("/urls/:id/edit", (req, res) => {
@@ -69,8 +77,22 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 })
 
 app.post("/login", (req, res) => {
-  let username = req.body.username;
-  res.cookie("username", username)
+  const email = req.body.email;
+  const password = req.body.password
+
+  if (!checkForRegisteredEmail(users, email)) {
+    res.status(403);
+    return res.send("403: User email cannot be found.")
+  }
+
+  const userInfo = checkForRegisteredPassword(users, password)
+
+  if (!userInfo) {
+    res.status(403);
+    return res.send("403: User password is incorrect.")
+  }
+
+  res.cookie("user_id", userInfo.id)
   res.redirect("/urls")
 })
 
@@ -92,13 +114,13 @@ app.post("/register", (req, res) => {
     return res.send("400: Email or password fields were not filled in.")
   }
 
-  if (checkForRegisteredUsers(users, newUser.email)) {
+  if (checkForRegisteredEmail(users, newUser.email)) {
     res.status(400);
     return res.send("400: Email is already being used.")
   }
   
   users[newUser.id] = newUser
-  res.cookie("user_id", users[newUser.id])
+  res.cookie("user_id", newUser.id)
   res.redirect("/urls")
 })
 
@@ -112,16 +134,17 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  // console.log(req.cookies["user_id"]);
   const templateVars = { 
   urls: urlDatabase, 
-  user: req.cookies["user_id"]
+  user: users[req.cookies["user_id"]]
   }
   res.render("urls_index", templateVars)
 })
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-  user: req.cookies["user_id"]
+  user: users[req.cookies["user_id"]]
   }
   res.render("urls_new", templateVars)
 })
@@ -129,16 +152,23 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { 
     shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], 
-    user: req.cookies["user_id"]
+    user: users[req.cookies["user_id"]]
   }
   res.render("urls_show", templateVars)
 })
 
 app.get("/register", (req, res) => {
   const templateVars = {
-  user: req.cookies["user_id"]
+  user: users[req.cookies["user_id"]]
   }
   res.render("register", templateVars)
+})
+
+app.get("/login", (req, res) => {
+  const templateVars = {
+    user: users[req.cookies["user_id"]]
+    }
+    res.render("login", templateVars)
 })
 
 app.listen(PORT, () => {
