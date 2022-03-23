@@ -49,8 +49,12 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/login", (req, res) => {
   let username = req.body.username;
   res.cookie("username", username)
-  res.redirect("/urls/")
-  console.log(user);
+  res.redirect("/urls")
+})
+
+app.post("/logout", (req, res) => {
+  res.clearCookie("username", { path: "/" });
+  res.redirect("/urls")
 })
 
 app.get("/u/:shortURL", (req, res) => {
