@@ -12,14 +12,15 @@
       </div>
     </div>
     <% if (!user) {%>
-      <form class="form-inline justify-content-end" action="/login" method="POST">
-        <input class="form-control" type="text" name="username" placeholder="Username"
-          style="width: 300px; margin: .5em">
-        <button type="submit" class="btn btn-outline-dark">Login</button>
-      </form>
+      <a class="justify-content-end mr-3" href="/login">
+        <button type="submit" class="btn btn-outline-dark" style="margin: .3em">Login</button>
+      </a>
+      <a class="justify-content-end" href="/register">
+        <button type="submit" class="btn btn-outline-dark" style="margin: .3em">Register</button>
+      </a>
       <%} else {%>
         Logged in as: <%= user.email %>
-          <form class="form-inline justify-content-end" action="/logout" method="POST" style="margin: .5em">
+          <form class="form-inline justify-content-end" action="/logout" method="POST" style="margin: .3em">
             <button type="submit" class="btn btn-outline-dark ml-2">Logout</button>
           </form>
           <%} %>
