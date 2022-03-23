@@ -72,6 +72,7 @@ app.post("/logout", (req, res) => {
 })
 
 app.post("/register", (req, res) => {
+  // creates new user object and adds it to users database
   let randomString = generateRandomString()
   let newUser = {}
   newUser.id = randomString;
@@ -79,7 +80,6 @@ app.post("/register", (req, res) => {
   newUser.password = req.body.password;
   users[newUser.id] = newUser 
   res.cookie("user_id", users[newUser.id])
-  console.log("users", users);
   res.redirect("/urls")
 })
 
@@ -110,7 +110,6 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { 
     shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], 
-    // username: req.cookies["username"] };
     user: req.cookies["user_id"]
   }
   res.render("urls_show", templateVars)
