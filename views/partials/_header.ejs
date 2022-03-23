@@ -19,7 +19,7 @@
       </form>
       <%} else {%>
         Logged in as: <%= username %>
-          <form action="/logout" method="POST">
+          <form class="form-inline justify-content-end" action="/logout" method="POST" style="margin: .5em">
             <button type="submit" class="btn btn-outline-dark ml-2">Logout</button>
           </form>
           <%} %>
