@@ -7,7 +7,7 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 
-    <title>Registration</title>
+    <title>Login</title>
   </head>
 
   <body>
@@ -15,26 +15,18 @@
     <%- include('partials/_header') %>
 
     <main style="margin: 1em;">
-      <h3>Login</h3>
-
-      <!-- Email Form -->
-      <form class="form-inline" action="/login" method="POST">
-        <div class="form-group mb-2">
-          <label for="email">Email Address:</label>
-          <input class="form-control" type="email" name="email" placeholder="example@email.com"
-            style="width: 300px; margin: 1em">
-        </div>
-        <!-- Password Form -->
-        <form class="form-inline" action="/login" method="POST">
-          <div class="form-group mb-2 ml-3">
-            <label for="password">Password:</label>
-            <input class="form-control" type="password" name="password" placeholder="password"
-              style="width: 300px; margin: 1em">
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </div>
-        </form>
+      <h3><strong>Login</strong></h3>
+    
+      <form class="justify-content-left" action="/login" method="POST">
+        <!-- Email -->
+        <label for="email">Email Address:</label>
+          <input class="form-control mb-2" type="email" name="email" placeholder="example@email.com" style="width: 300px;">
+        <!-- Password -->
+        <label for="password">Password:</label>
+        <input class="form-control" type="password" name="password" placeholder="password" style="width: 300px;">
+        <button type="submit" class="btn btn-primary mt-3">Submit</button>
       </form>
-      
+    
     </main>
 
       <!-- Bootstrap JS -->
