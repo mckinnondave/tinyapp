@@ -11,14 +11,14 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
-    <% if (!username) {%>
+    <% if (!user) {%>
       <form class="form-inline justify-content-end" action="/login" method="POST">
         <input class="form-control" type="text" name="username" placeholder="Username"
           style="width: 300px; margin: .5em">
         <button type="submit" class="btn btn-outline-dark">Login</button>
       </form>
       <%} else {%>
-        Logged in as: <%= username %>
+        Logged in as: <%= user.email %>
           <form class="form-inline justify-content-end" action="/logout" method="POST" style="margin: .5em">
             <button type="submit" class="btn btn-outline-dark ml-2">Logout</button>
           </form>
