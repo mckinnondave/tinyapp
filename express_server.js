@@ -48,7 +48,7 @@ function generateRandomString() {
   return result.substring(0,6)
 }
 
-const checkForRegisteredEmail = (database, email) => {
+const getUserByEmail = (database, email) => {
   for (const data in database) {
     if (database[data]["email"] === email) {
       return database[data];
@@ -95,7 +95,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password
-  const user = checkForRegisteredEmail(users, email)
+  const user = getUserByEmail(users, email)
   
   if (!user || !bcrypt.compareSync(password, user.password)) {
     res.status(403);
@@ -127,7 +127,7 @@ app.post("/register", (req, res) => {
     return res.send("400: Email or password fields were not filled in.")
   }
 
-  if (checkForRegisteredEmail(users, newUser.email)) {
+  if (getUserByEmail(users, newUser.email)) {
     res.status(400);
     return res.send("400: Email is already being used.")
   }
