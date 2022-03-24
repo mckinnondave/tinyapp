@@ -9,11 +9,6 @@ app.use(cookieParser());
 
 app.set("view engine", "ejs")
 
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
-
 const urlDatabase = {
     b6UTxQ: {
         longURL: "https://www.tsn.ca",
@@ -24,6 +19,16 @@ const urlDatabase = {
         userID: "aJ48lW"
     }
 };
+
+const urlsForUser = (id) => {
+  const matchingURLs = {};
+  for (const data in urlDatabase) {
+    if (urlDatabase[data].userID === id) {
+      matchingURLs[data] = urlDatabase[data];
+    }
+  }
+  return matchingURLs;
+}
 
 const users = { 
   "userRandomID": {
@@ -81,12 +86,21 @@ app.post("/urls/:id/edit", (req, res) => {
 })
 
 app.post("/urls/:id", (req, res) => {
+  let user = req.cookies["user_id"]
+  if (!user) {
+    res.status(403)
+    return res.send("Unauthorized access")
+  }
   const shortURL = req.params.id
-  // console.log(shortURL);
   res.redirect(`/urls/${shortURL}`)
 })
 
 app.post("/urls/:shortURL/delete", (req, res) => {
+  let user = req.cookies["user_id"]
+  if (!user) {
+    res.status(403)
+    return res.send("Unauthorized access")
+  }
   delete urlDatabase[req.params.shortURL]
   res.redirect("/urls")
 })
@@ -156,9 +170,10 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const templateVars = { 
-  urls: urlDatabase, 
+  urls: urlsForUser(req.cookies["user_id"]),
   user: users[req.cookies["user_id"]]
   }
+ 
   res.render("urls_index", templateVars)
 })
 
@@ -176,13 +191,17 @@ app.get("/urls/:shortURL", (req, res) => {
   if (!urlDatabase[req.params.shortURL]) {
     res.status(404)
     return res.send("404: Page not found.")
+  } else if (urlDatabase[req.params.shortURL].userID !== req.cookies["user_id"]) {
+    res.status(404)
+    return res.send("404: Access Denied")//
+  } else {
+    const templateVars = { 
+      shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL,
+      user: users[req.cookies["user_id"]]
+    }
+    console.log(templateVars);
+    res.render("urls_show", templateVars)
   }
-  const templateVars = { 
-    shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL,
-    user: users[req.cookies["user_id"]]
-  }
-  console.log(templateVars);
-  res.render("urls_show", templateVars)
 })
 
 app.get("/register", (req, res) => {
