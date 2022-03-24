@@ -52,15 +52,6 @@ const checkForRegisteredEmail = (database, email) => {
   return false
 }
 
-const checkForRegisteredPassword = (database, password) => {
-  for (const data in database) {
-    if (database[data]["password"] === password) {
-      return database[data];
-    }
-  }
-  return false
-}
-
 app.post("/urls", (req, res) => {
   if(!req.cookies["user_id"]) {
     return res.send("Error: Cannot post without logging in.")
