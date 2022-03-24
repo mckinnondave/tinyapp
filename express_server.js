@@ -33,7 +33,7 @@ app.get("/", (req, res) => {
     res.redirect("/login");
   }
   res.redirect("/urls");
-})
+});
 
 app.post("/urls", (req, res) => {
   if (!req.session.user_id) {
