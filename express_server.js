@@ -1,13 +1,18 @@
 const express = require("express");
+const cookieSession = require("cookie-session");
 const app = express();
 const PORT = 8080;
-const bodyParser = require("body-parser")
-const cookieParser = require("cookie-parser")
-const bcrypt = require("bcryptjs")
+const bodyParser = require("body-parser");
+const bcrypt = require("bcryptjs");
 
 
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+
+app.use(cookieSession({
+  name: 'session',
+  keys: ["Brassneck", "Faculty", "Mainstreet"],
+  maxAge: 24 * 60 * 60 * 1000 
+}))
 
 app.set("view engine", "ejs")
 
@@ -53,22 +58,22 @@ const checkForRegisteredEmail = (database, email) => {
 }
 
 app.post("/urls", (req, res) => {
-  if(!req.cookies["user_id"]) {
+  if(!req.session.user_id) {
     return res.send("Error: Cannot post without logging in.")
   }
   let randomKey = generateRandomString();
-  urlDatabase[randomKey] = { longURL: req.body.longURL, userID: req.cookies.user_id }
+  urlDatabase[randomKey] = { longURL: req.body.longURL, userID: req.session.user_id }
   res.redirect(`/urls/${randomKey}`);
 });
 
 app.post("/urls/:id/edit", (req, res) => {
   const shortURL = req.params.id;
-  urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.cookies.user_id };
+  urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.session.user_id };
   res.redirect(`/urls/${shortURL}`)
 })
 
 app.post("/urls/:id", (req, res) => {
-  let user = req.cookies["user_id"]
+  let user = req.session.user_id;
   if (!user) {
     res.status(403)
     return res.send("Unauthorized access")
@@ -78,7 +83,7 @@ app.post("/urls/:id", (req, res) => {
 })
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  let user = req.cookies["user_id"]
+  let user = req.session.user_id;
   if (!user) {
     res.status(403)
     return res.send("Unauthorized access")
@@ -97,12 +102,12 @@ app.post("/login", (req, res) => {
     return res.send("403: User email or password is incorrect.")
   }
 
-  res.cookie("user_id", user.id)
+  req.session.user_id = user.id
   res.redirect("/urls")
 })
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id", { path: "/" });
+  req.session = null
   res.redirect("/urls")
 })
 
@@ -128,7 +133,7 @@ app.post("/register", (req, res) => {
   }
   
   users[newUser.id] = newUser
-  res.cookie("user_id", newUser.id)
+  req.session.user_id = newUser.id
   res.redirect("/urls")
 })
 
@@ -149,8 +154,8 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const templateVars = { 
-  urls: urlsForUser(req.cookies["user_id"]),
-  user: users[req.cookies["user_id"]]
+  urls: urlsForUser(req.session.user_id),
+  user: users[req.session.user_id]
   }
  
   res.render("urls_index", templateVars)
@@ -158,7 +163,7 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-  user: users[req.cookies["user_id"]]
+  user: users[req.session.user_id]
   }
   if (!templateVars.user) {
     return res.redirect("/login")
@@ -170,13 +175,13 @@ app.get("/urls/:shortURL", (req, res) => {
   if (!urlDatabase[req.params.shortURL]) {
     res.status(404)
     return res.send("404: Page not found.")
-  } else if (urlDatabase[req.params.shortURL].userID !== req.cookies["user_id"]) {
+  } else if (urlDatabase[req.params.shortURL].userID !== req.session.user_id) {
     res.status(404)
     return res.send("404: Access Denied")//
   } else {
     const templateVars = { 
       shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL,
-      user: users[req.cookies["user_id"]]
+      user: users[req.session.user_id]
     }
     res.render("urls_show", templateVars)
   }
@@ -184,14 +189,14 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.get("/register", (req, res) => {
   const templateVars = {
-  user: users[req.cookies["user_id"]]
+  user: users[req.session.user_id]
   }
   res.render("register", templateVars)
 })
 
 app.get("/login", (req, res) => {
   const templateVars = {
-    user: users[req.cookies["user_id"]]
+    user: users[req.session.user_id]
     }
     res.render("login", templateVars)
 })
