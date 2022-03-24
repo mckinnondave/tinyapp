@@ -100,21 +100,11 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password
   const user = checkForRegisteredEmail(users, email)
-  const userPass = checkForRegisteredPassword(users, password)
-  console.log(password);
-  console.log(user)
-  // console.log(userPass);
   
   if (!user || !bcrypt.compareSync(password, user.password)) {
     res.status(403);
     return res.send("403: User email or password is incorrect.")
   }
-
-  // const userInfo = checkForRegisteredPassword(users, password)
-  // if (!userInfo) {
-  //   res.status(403);
-  //   return res.send("403: User password is incorrect.")
-  // }
 
   res.cookie("user_id", user.id)
   res.redirect("/urls")
