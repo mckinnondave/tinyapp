@@ -33,7 +33,7 @@ app.get("/", (req, res) => {
     res.redirect("/login");
   }
   res.redirect("/urls");
-});
+})
 
 app.post("/urls", (req, res) => {
   if (!req.session.user_id) {
@@ -167,6 +167,9 @@ app.get("/register", (req, res) => {
   const templateVars = {
     user: users[req.session.user_id]
   };
+  if (templateVars.user) {
+    res.redirect("/urls")
+  }
   res.render("register", templateVars);
 });
 
@@ -174,6 +177,9 @@ app.get("/login", (req, res) => {
   const templateVars = {
     user: users[req.session.user_id]
   };
+  if (templateVars.user) {
+    res.redirect("/urls")
+  }
   res.render("login", templateVars);
 });
 
