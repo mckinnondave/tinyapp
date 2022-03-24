@@ -1,11 +1,15 @@
+// -- Global Constants --
 const express = require("express");
 const cookieSession = require("cookie-session");
 const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
+const { getUserByEmail, generateRandomString, urlsForUser } = require("./helpers")
 
+app.set("view engine", "ejs")
 
+// -- Middleware --
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.use(cookieSession({
@@ -14,7 +18,8 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000 
 }))
 
-app.set("view engine", "ejs")
+// -- Databases --
+const users = {}
 
 const urlDatabase = {
     b6UTxQ: {
@@ -27,35 +32,10 @@ const urlDatabase = {
     }
 };
 
-const urlsForUser = (id) => {
-  const matchingURLs = {};
-  for (const data in urlDatabase) {
-    if (urlDatabase[data].userID === id) {
-      matchingURLs[data] = urlDatabase[data];
-    }
-  }
-  return matchingURLs;
-}
-
-const users = {}
-
-function generateRandomString() {
-  let result = ""
-  let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-  for (let i = 0; i < chars.length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));   
-  }
-  return result.substring(0,6)
-}
-
-const getUserByEmail = (database, email) => {
-  for (const data in database) {
-    if (database[data]["email"] === email) {
-      return database[data];
-    }
-  }
-  return false
-}
+// -- Routes --
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
 
 app.post("/urls", (req, res) => {
   if(!req.session.user_id) {
@@ -112,7 +92,6 @@ app.post("/logout", (req, res) => {
 })
 
 app.post("/register", (req, res) => {
-  // creates new user object and adds it to users database
   const randomString = generateRandomString()
   const newUser = {}
   const password = req.body.password;
@@ -148,13 +127,9 @@ app.get("/u/:shortURL", (req, res) => {
   }  
 });
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
 app.get("/urls", (req, res) => {
   const templateVars = { 
-  urls: urlsForUser(req.session.user_id),
+  urls: urlsForUser(urlDatabase, req.session.user_id),
   user: users[req.session.user_id]
   }
  
@@ -205,9 +180,7 @@ app.listen(PORT, () => {
   console.log(`App is listening on port ${PORT}!`);
 })
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
+
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
