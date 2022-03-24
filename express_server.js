@@ -1,4 +1,4 @@
-// -- Global Constants --
+///// GLOBAL CONSTANTS /////
 const express = require("express");
 const cookieSession = require("cookie-session");
 const app = express();
@@ -9,7 +9,7 @@ const { getUserByEmail, generateRandomString, urlsForUser } = require("./helpers
 
 app.set("view engine", "ejs");
 
-// -- Middleware --
+///// MIDDLEWARE /////
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.use(cookieSession({
@@ -18,21 +18,11 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000
 }));
 
-// -- Databases --
+///// DATABASES /////
 const users = {};
+const urlDatabase = {};
 
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW"
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW"
-  }
-};
-
-// -- Routes --
+///// ROUTES /////
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
@@ -59,7 +49,7 @@ app.post("/urls/:id", (req, res) => {
     res.status(403);
     return res.send("Unauthorized access");
   }
-  
+
   const shortURL = req.params.id;
   res.redirect(`/urls/${shortURL}`);
 });
@@ -178,10 +168,7 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 });
 
+///// APP.LISTEN /////
 app.listen(PORT, () => {
   console.log(`App is listening on port ${PORT}!`);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
