@@ -3,6 +3,8 @@ const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser")
 const cookieParser = require("cookie-parser")
+const bcrypt = require("bcryptjs")
+
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
@@ -30,18 +32,7 @@ const urlsForUser = (id) => {
   return matchingURLs;
 }
 
-const users = { 
-  "userRandomID": {
-    id: "userRandomID", 
-    email: "1@example.com", 
-    password: "123"
-  },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "2@example.com", 
-    password: "456"
-  }
-}
+const users = {}
 
 function generateRandomString() {
   let result = ""
@@ -108,20 +99,24 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password
-
-  if (!checkForRegisteredEmail(users, email)) {
+  const user = checkForRegisteredEmail(users, email)
+  const userPass = checkForRegisteredPassword(users, password)
+  console.log(password);
+  console.log(user)
+  // console.log(userPass);
+  
+  if (!user || !bcrypt.compareSync(password, user.password)) {
     res.status(403);
-    return res.send("403: User email cannot be found.")
+    return res.send("403: User email or password is incorrect.")
   }
 
-  const userInfo = checkForRegisteredPassword(users, password)
+  // const userInfo = checkForRegisteredPassword(users, password)
+  // if (!userInfo) {
+  //   res.status(403);
+  //   return res.send("403: User password is incorrect.")
+  // }
 
-  if (!userInfo) {
-    res.status(403);
-    return res.send("403: User password is incorrect.")
-  }
-
-  res.cookie("user_id", userInfo.id)
+  res.cookie("user_id", user.id)
   res.redirect("/urls")
 })
 
@@ -132,11 +127,14 @@ app.post("/logout", (req, res) => {
 
 app.post("/register", (req, res) => {
   // creates new user object and adds it to users database
-  let randomString = generateRandomString()
-  let newUser = {}
+  const randomString = generateRandomString()
+  const newUser = {}
+  const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10)
   newUser.id = randomString;
   newUser.email = req.body.email;
-  newUser.password = req.body.password;
+  newUser.password = hashedPassword;
+  
   
   if (newUser.email === "" || newUser.password === "") {
     res.status(400);
@@ -199,7 +197,6 @@ app.get("/urls/:shortURL", (req, res) => {
       shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL,
       user: users[req.cookies["user_id"]]
     }
-    console.log(templateVars);
     res.render("urls_show", templateVars)
   }
 })
