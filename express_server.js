@@ -27,13 +27,22 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+app.get("/", (req, res) => {
+  const user = req.session.user_id;
+  if(!user) {
+    res.redirect("/login");
+  }
+  res.redirect("/urls");
+})
+
 app.post("/urls", (req, res) => {
   if (!req.session.user_id) {
-    return res.send("Error: Cannot post without logging in.");
+    res.status(400).send("Error: Cannot post without logging in.");
+    return;
   }
-  let randomKey = generateRandomString();
-  urlDatabase[randomKey] = { longURL: req.body.longURL, userID: req.session.user_id };
-  res.redirect(`/urls/${randomKey}`);
+  let id = generateRandomString();
+  urlDatabase[id] = { longURL: req.body.longURL, userID: req.session.user_id };
+  res.redirect(`/urls/${id}`);
 });
 
 app.post("/urls/:id/edit", (req, res) => {
@@ -46,8 +55,8 @@ app.post("/urls/:id", (req, res) => {
   let user = req.session.user_id;
 
   if (!user) {
-    res.status(403);
-    return res.send("Unauthorized access");
+    res.status(400).send("Error: Unauthorized access");
+    return;
   }
 
   const shortURL = req.params.id;
@@ -58,8 +67,8 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   let user = req.session.user_id;
 
   if (!user) {
-    res.status(403);
-    return res.send("Unauthorized access");
+    res.status(400).send("Error: Unauthorized access");
+    return;
   }
 
   delete urlDatabase[req.params.shortURL];
@@ -72,8 +81,8 @@ app.post("/login", (req, res) => {
   const user = getUserByEmail(users, email);
   
   if (!user || !bcrypt.compareSync(password, user.password)) {
-    res.status(403);
-    return res.send("403: User email or password is incorrect.");
+    res.status(400).send("Error: User email or password is incorrect.");
+    return;
   }
 
   req.session.user_id = user.id;
@@ -86,22 +95,22 @@ app.post("/logout", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  const randomString = generateRandomString();
+  const id = generateRandomString();
   const newUser = {};
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
-  newUser.id = randomString;
+  newUser.id = id;
   newUser.email = req.body.email;
   newUser.password = hashedPassword;
   
   if (newUser.email === "" || newUser.password === "") {
-    res.status(400);
-    return res.send("400: Email or password fields were not filled in.");
+    res.status(400).send("Error: Email or password fields were not filled in.");
+    return;
   }
 
   if (getUserByEmail(users, newUser.email)) {
-    res.status(400);
-    return res.send("400: Email is already being used.");
+    res.status(400).send("Error: Email is already being used.");
+    return;
   }
   
   users[newUser.id] = newUser;
@@ -111,8 +120,8 @@ app.post("/register", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   if (!urlDatabase[req.params.shortURL]) {
-    res.status(404);
-    return res.send("404: Page not found.");
+    res.status(400).send("Error: Page not found.");
+    return;
   }
   const longURL = urlDatabase[req.params.shortURL];
   if (longURL) {
@@ -140,11 +149,11 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   if (!urlDatabase[req.params.shortURL]) {
-    res.status(404);
-    return res.send("404: Page not found.");
+    res.status(400).send("Error: Page not found.");
+    return;
   } else if (urlDatabase[req.params.shortURL].userID !== req.session.user_id) {
-    res.status(404);
-    return res.send("404: Access Denied");//
+    res.status(400).send("Error: Access Denied");
+    return;
   } else {
     const templateVars = {
       shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL,
@@ -168,7 +177,7 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 });
 
-///// APP.LISTEN /////
+///// LISTENING /////
 app.listen(PORT, () => {
   console.log(`App is listening on port ${PORT}!`);
 });
