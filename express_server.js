@@ -71,7 +71,7 @@ const checkForRegisteredPassword = (database, password) => {
 }
 
 app.post("/urls", (req, res) => {
-  if(!req.cookies.user_id) {
+  if(!req.cookies["user_id"]) {
     return res.send("Error: Cannot post without logging in.")
   }
   let randomKey = generateRandomString();
