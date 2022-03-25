@@ -52,6 +52,9 @@ TinyApp is a full stack web application built with Node and Express that allows 
 ### partials
 - contains file for header banner
 
+### docs
+- contains images for README.md
+
 ## Getting Started
 
 - Install all dependencies (using the `npm install` command).
