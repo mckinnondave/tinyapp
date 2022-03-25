@@ -36,22 +36,17 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${id}`);
 });
 
-app.post("/urls/:id/edit", (req, res) => {
-  const shortURL = req.params.id;
-  urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.session.user_id };
-  res.redirect(`/urls/${shortURL}`);
-});
-
 app.post("/urls/:id", (req, res) => {
   const user = req.session.user_id;
+  const shortURL = req.params.id;
 
   if (!user) {
     res.status(400).send("Error: Unauthorized access");
     return;
   }
 
-  const shortURL = req.params.id;
-  res.redirect(`/urls/${shortURL}`);
+  urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.session.user_id };
+  res.redirect("/urls");
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
@@ -113,6 +108,7 @@ app.get("/", (req, res) => {
   const user = req.session.user_id;
   if (!user) {
     res.redirect("/login");
+    return;
   }
   res.redirect("/urls");
 });
@@ -169,6 +165,7 @@ app.get("/register", (req, res) => {
   };
   if (templateVars.user) {
     res.redirect("/urls");
+    return;
   }
   res.render("register", templateVars);
 });
@@ -179,6 +176,7 @@ app.get("/login", (req, res) => {
   };
   if (templateVars.user) {
     res.redirect("/urls");
+    return;
   }
   res.render("login", templateVars);
 });
