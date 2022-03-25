@@ -23,13 +23,8 @@ const users = {};
 const urlDatabase = {};
 
 ///// ROUTES /////
-app.get("/", (req, res) => {
-  const user = req.session.user_id;
-  if (!user) {
-    res.redirect("/login");
-  }
-  res.redirect("/urls");
-});
+
+/// Post Requests
 
 app.post("/urls", (req, res) => {
   if (!req.session.user_id) {
@@ -109,6 +104,16 @@ app.post("/register", (req, res) => {
 
   users[newUser.id] = newUser;
   req.session.user_id = newUser.id;
+  res.redirect("/urls");
+});
+
+/// Get Requests
+
+app.get("/", (req, res) => {
+  const user = req.session.user_id;
+  if (!user) {
+    res.redirect("/login");
+  }
   res.redirect("/urls");
 });
 
