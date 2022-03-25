@@ -25,11 +25,11 @@ const urlDatabase = {};
 ///// ROUTES /////
 app.get("/", (req, res) => {
   const user = req.session.user_id;
-  if(!user) {
+  if (!user) {
     res.redirect("/login");
   }
   res.redirect("/urls");
-})
+});
 
 app.post("/urls", (req, res) => {
   if (!req.session.user_id) {
@@ -72,7 +72,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const { email, password } = req.body
+  const { email, password } = req.body;
   const user = getUserByEmail(users, email);
   
   if (!user || !bcrypt.compareSync(password, user.password)) {
@@ -95,7 +95,7 @@ app.post("/register", (req, res) => {
     id: id,
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 10)
-  }
+  };
 
   if (!newUser.email || !newUser.password) {
     res.status(400).send("Error: Email or password fields were not filled in.");
@@ -133,7 +133,7 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    user: users[req.session.user_id] 
+    user: users[req.session.user_id]
   };
   if (!templateVars.user) {
     return res.redirect("/login");
@@ -163,7 +163,7 @@ app.get("/register", (req, res) => {
     user: users[req.session.user_id]
   };
   if (templateVars.user) {
-    res.redirect("/urls")
+    res.redirect("/urls");
   }
   res.render("register", templateVars);
 });
@@ -173,7 +173,7 @@ app.get("/login", (req, res) => {
     user: users[req.session.user_id]
   };
   if (templateVars.user) {
-    res.redirect("/urls")
+    res.redirect("/urls");
   }
   res.render("login", templateVars);
 });
